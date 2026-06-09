@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import json
 import os
@@ -122,6 +122,21 @@ def get_lang(lang):
         return jsonify(data)
     except Exception:
         return jsonify({})
+
+# =====================================================
+# 🚀 PWA SUPPORT (추가된 부분)
+# =====================================================
+
+# manifest.json 서빙
+@app.route("/manifest.json")
+def manifest():
+    return send_from_directory("static", "manifest.json")
+
+# service worker 서빙
+@app.route("/sw.js")
+def service_worker():
+    return send_from_directory("static/js", "sw.js")
+
 
 # -------------------
 # RUN (Render용)

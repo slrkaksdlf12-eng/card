@@ -7,6 +7,10 @@
 
     <link rel="stylesheet" href="/static/css/style.css">
 
+    <!-- 🔥 PWA MANIFEST -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+
     <style>
         html, body {
             margin: 0;
@@ -14,8 +18,7 @@
             width: 100%;
             height: 100%;
             background: #000;
-
-            overflow: auto; /* 🔥 핵심: hidden 금지 */
+            overflow: auto;
         }
 
         * {
@@ -28,22 +31,17 @@
             min-height: 100dvh;
         }
 
-        /* ================= TOP BAR ================= */
         .top-bar {
             position: fixed;
             top: 0;
             left: 0;
-
             width: 100%;
             height: 48px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             padding: 0 12px;
             background: #0f0f0f;
-
             z-index: 1000;
         }
 
@@ -52,37 +50,29 @@
             opacity: 0.7;
         }
 
-        /* 🔥 settings 버튼 */
         .settings-btn {
             font-size: 22px;
             color: white;
             cursor: pointer;
-
             z-index: 999999;
             position: relative;
         }
 
-        /* ================= CONTENT ================= */
         .app {
             flex: 1;
             padding-top: 60px;
             padding-bottom: 80px;
-
             width: 100%;
         }
 
-        /* ================= BOTTOM NAV ================= */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
-
             width: 100%;
             height: 60px;
-
             display: flex;
             background: #111;
-
             z-index: 1000;
         }
 
@@ -93,23 +83,17 @@
             color: white;
         }
 
-        /* ================= SETTINGS PANEL ================= */
         .settings-panel {
             position: fixed;
             top: 50px;
             right: 10px;
-
             width: 160px;
-
             background: #1a1a1a;
             color: white;
-
             border-radius: 10px;
             padding: 10px;
-
             display: none;
-
-            z-index: 2147483647; /* 🔥 최상단 강제 */
+            z-index: 2147483647;
         }
 
         .settings-panel.open {
@@ -132,7 +116,6 @@
 <!-- 🔥 TOP BAR -->
 <div class="top-bar">
     <div class="user">{{ user }}</div>
-
     <div class="settings-btn" id="settingsBtn">⚙</div>
 </div>
 
@@ -141,25 +124,23 @@
     {% block content %}{% endblock %}
 </div>
 
-<!-- 🔥 BOTTOM -->
+<!-- 🔥 BOTTOM NAV -->
 <div class="bottom-nav">
     <button onclick="location.href='/lobby'">HOME</button>
     <button onclick="location.href='/gacha'">GACHA</button>
-    <button>COLLECT</button>
+    <button onclick="location.href='/collection'">COLLECT</button>
 </div>
 
 <!-- 🔥 SETTINGS -->
 <div id="settingsPanel" class="settings-panel">
-
     <button onclick="location.href='/logout'">LOGOUT</button>
-
     <button onclick="setLanguage('ko')">한국어</button>
     <button onclick="setLanguage('ja')">日本語</button>
-
 </div>
 
 <script src="/static/js/app.js"></script>
 
+<!-- 🔥 SETTINGS TOGGLE -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("settingsBtn");
@@ -171,6 +152,15 @@ document.addEventListener("DOMContentLoaded", () => {
         panel.classList.toggle("open");
     });
 });
+</script>
+
+<!-- 🔥 PWA SERVICE WORKER -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log("SW registered"))
+        .catch(err => console.log("SW failed", err));
+}
 </script>
 
 </body>
