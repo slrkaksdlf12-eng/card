@@ -1,0 +1,42 @@
+{
+  "login_title": "로그인",
+  "username": "아이디",
+  "password": "비밀번호",
+  "login_btn": "로그인",
+  "register_link": "회원가입",
+
+  "register_title": "회원가입",
+  "register_btn": "가입하기",
+  "login_link": "로그인으로",
+
+  "lobby_title": "스타 드로우 로비",
+  "lobby_sub": "오늘의 스타를 뽑아보세요",
+
+  "start_btn": "시작하기",
+  "logout_btn": "로그아웃",
+
+  "gacha_title": "카드",
+  "draw_btn": "뽑기",
+  "subtitle": "카드를 뽑아보세요",
+
+  "btn_gacha": "카드 뽑기",
+  "btn_collection": "컬렉션",
+  "btn_reward": "보상",
+
+  "home": "홈",
+  "pull": "뽑기",
+  "collect": "컬렉션",
+  "logout": "로그아웃",
+  "btn_sound": "음량",
+  "txt_settings": "설정",
+  "btn_settings": "설정",
+  "back": "뒤로가기",
+
+  "collection_title": "도감",
+
+  "collection_n": "N 등급",
+  "collection_sr": "SR 등급",
+  "collection_ssr": "SSR 등급"
+
+
+}

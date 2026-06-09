@@ -1,0 +1,221 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+
+  background: #000;
+  color: #fff;
+
+  font-family: sans-serif;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* =========================
+   WRAP (gacha랑 동일 기준)
+========================= */
+.wrap {
+  width: 100%;
+  min-height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 20px 0;
+  gap: 20px;
+}
+
+/* =========================
+   BACK BUTTON
+========================= */
+.back-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+
+  background: rgba(255,255,255,0.1);
+  color: white;
+
+  z-index: 10;
+
+  touch-action: manipulation;
+}
+
+/* =========================
+   PROGRESS (🔥 추가)
+========================= */
+.progress {
+  width: 95vw;
+  max-width: 620px;
+  text-align: center;
+
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* =========================
+   SECTION WRAPPER
+========================= */
+.section {
+  width: 95vw;
+  max-width: 620px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+/* =========================
+   TITLE
+========================= */
+.section-title {
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+/* =========================
+   GRID
+========================= */
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.grid.cols-6 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid.cols-3 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid.cols-1 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+/* =========================
+   ⭐ 여기만 “추가”
+   (절대 기존 삭제 안 함)
+========================= */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+}
+
+/* =========================
+   CARD
+========================= */
+.card {
+  aspect-ratio: 2 / 3;
+  position: relative;
+
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+
+  overflow: hidden;
+
+  cursor: pointer;
+}
+
+/* =========================
+   IMAGE
+========================= */
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* =========================
+   EMPTY SLOT
+========================= */
+.question {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  opacity: 0.5;
+}
+
+/* =========================
+   BADGE
+========================= */
+.badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+
+  font-size: 12px;
+  padding: 2px 6px;
+
+  border-radius: 6px;
+
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+
+  pointer-events: none;
+}
+
+/* =========================
+   COUNT BADGE
+========================= */
+.count-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+
+  font-size: 11px;
+  padding: 2px 5px;
+
+  background: rgba(0,0,0,0.75);
+  border-radius: 5px;
+
+  color: white;
+}
+
+/* =========================
+   MODAL
+========================= */
+.modal {
+  position: fixed;
+  inset: 0;
+
+  display: none;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0,0,0,0.85);
+
+  z-index: 999;
+}
+
+.modal img {
+  max-width: 90vw;
+  max-height: 90vh;
+
+  border-radius: 12px;
+}
+
+.modal.show {
+  display: flex;
+}

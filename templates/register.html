@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>App</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1 id="title"></h1>
+
+    <form action="/register" method="POST">
+
+        <input id="username" name="username">
+        <input id="password" name="password" type="password">
+
+        <button id="btn" type="submit"></button>
+
+    </form>
+
+    <a href="/" id="login_link"></a>
+
+    <!-- 🌏 언어 유지 -->
+    <div class="lang">
+        <button onclick="setLanguage('ko')">KO</button>
+        <button onclick="setLanguage('ja')">JA</button>
+    </div>
+
+</div>
+
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>

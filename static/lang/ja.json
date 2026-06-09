@@ -1,0 +1,41 @@
+{
+  "login_title": "ログイン",
+  "username": "ユーザー名",
+  "password": "パスワード",
+  "login_btn": "ログイン",
+  "register_link": "会員登録",
+
+  "register_title": "会員登録",
+  "register_btn": "登録する",
+  "login_link": "ログインへ",
+
+  "lobby_title": "スター ドロー ロビー",
+  "lobby_sub": "今日のスターを引いてみよう",
+
+  "start_btn": "スタート",
+  "logout_btn": "ログアウト",
+
+  "gacha_title": "カード",
+  "draw_btn": "引く",
+  "subtitle": "カードを引いてみよう",
+
+  "btn_gacha": "カードを引く",
+  "btn_collection": "コレクション",
+  "btn_reward": "報酬",
+
+  "home": "ホーム",
+  "pull": "引く",
+  "collect": "コレクション",
+  "logout": "ログアウト",
+  "btn_sound": "音量",
+  "txt_settings": "設定",
+  "btn_settings": "設定",
+  "back": "戻る",
+
+  "collection_title": "図鑑",
+
+  "collection_n": "Nランク",
+  "collection_sr": "SRランク",
+  "collection_ssr": "SSRランク"
+  
+}

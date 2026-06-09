@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+  <title data-i18n="gacha_title">Gacha</title>
+
+  <!-- 공용 카드 스타일 -->
+  <link rel="stylesheet" href="/static/css/card.css">
+
+  <!-- gacha 로직 -->
+  <script src="/static/js/card.js" defer></script>
+</head>
+
+<body>
+
+  <!-- 🔥 UI LAYER (WebView fixed 안정화 핵심) -->
+  <div class="ui-layer">
+    <button class="back-btn" onclick="location.href='/'" data-i18n="back">
+      BACK
+    </button>
+  </div>
+
+  <!-- 🔥 MAIN LAYER (3D 카드 전용) -->
+  <div class="wrap">
+    <div id="cardArea"></div>
+  </div>
+
+</body>
+</html>

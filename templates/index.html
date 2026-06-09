@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>App</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- ✅ PWA: manifest 추가 -->
+    <link rel="manifest" href="/static/manifest.json">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #0f0f1a, #1b1b2e);
+            color: white;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        form {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input {
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: #6c5ce7;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        a {
+            margin-top: 15px;
+            color: #aaa;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: white;
+        }
+
+        .lang {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang button {
+            padding: 8px 12px;
+            font-size: 12px;
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- TITLE -->
+    <h1 id="title" data-i18n="login_title"></h1>
+
+    <!-- LOGIN FORM -->
+    <form action="/login" method="POST">
+
+        <input id="username" name="username" data-i18n-placeholder="username">
+        <input id="password" name="password" type="password" data-i18n-placeholder="password">
+
+        <button id="btn" type="submit" data-i18n="login_btn"></button>
+
+    </form>
+
+    <!-- REGISTER -->
+    <a href="/register" id="register_link" data-i18n="register_link"></a>
+
+    <!-- 🌏 언어 선택 -->
+    <div class="lang">
+        <button onclick="setLanguage('ko')">KO</button>
+        <button onclick="setLanguage('ja')">JA</button>
+    </div>
+
+</div>
+
+<!-- 기존 앱 JS -->
+<script src="/static/js/app.js"></script>
+
+<!-- ✅ PWA: service worker 등록 -->
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/sw.js");
+}
+</script>
+
+</body>
+</html>
