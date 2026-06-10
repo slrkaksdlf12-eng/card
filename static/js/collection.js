@@ -6,12 +6,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   let lang = localStorage.getItem("lang") || "ko";
   let dict = {};
 
+  // =========================
+  // 언어 로드
+  // =========================
   try {
     const res = await fetch(`/api/lang/${lang}`);
     dict = await res.json();
   } catch (e) {
     console.warn("lang load failed");
   }
+
+  // =========================
+  // 🔥 번역 적용 (핵심 추가)
+  // =========================
+  function applyLang() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.dataset.i18n;
+      if (dict[key]) el.innerText = dict[key];
+    });
+  }
+
+  applyLang();
 
   function getRarity(img) {
     if (!img) return null;
@@ -95,14 +110,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // =========================
-  // 카드 생성 (NEW 수정 완료)
+  // 카드 생성
   // =========================
   function createCard(data) {
 
     const card = document.createElement("div");
     card.className = "card";
 
-    // 빈칸
     if (!data) {
       card.innerHTML = `<div class="question">?</div>`;
       return card;
@@ -110,7 +124,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const isNew = !seenSet.has(data.img);
 
-    // 카드 구조
     card.innerHTML = `
       <img src="${data.img}" />
       ${isNew ? `<div class="new-badge">NEW</div>` : ""}

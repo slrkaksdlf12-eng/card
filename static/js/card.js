@@ -24,6 +24,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let locked = false;
 
+  // =========================
+  // 🔥 SSR render freeze flag 추가
+  // =========================
+  let ssrMode = false;
+
   function getRarity() {
     const r = Math.random() * 100;
     if (r < 70) return "N";
@@ -31,14 +36,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "SSR";
   }
 
+  const IMAGE_POOL = {
+    N: 30,
+    SR: 15,
+    SSR: 5
+  };
+
   function getImage(rarity) {
-    if (rarity === "N") {
-      return `/static/assets/images/a/a${Math.floor(Math.random() * 50) + 1}.png`;
-    }
-    if (rarity === "SR") {
-      return `/static/assets/images/b/b${Math.floor(Math.random() * 30) + 1}.png`;
-    }
-    return `/static/assets/images/c/c${Math.floor(Math.random() * 10) + 1}.png`;
+    const count = IMAGE_POOL[rarity];
+
+    const folder = rarity === "N"
+      ? "a"
+      : rarity === "SR"
+      ? "b"
+      : "c";
+
+    const idx = Math.floor(Math.random() * count) + 1;
+
+    return `/static/assets/images/${folder}/${folder}${idx}.png`;
   }
 
   function saveToCollection(card) {
@@ -80,7 +95,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     card.addEventListener("click", () => {
 
-      // 🔥 이미 선택된 카드 → 이동
       if (card.classList.contains("active-card")) {
         location.href = "/collection";
         return;
@@ -91,17 +105,47 @@ document.addEventListener("DOMContentLoaded", async () => {
       locked = true;
       revealed = true;
 
-      imgEl.src = img;
-      badgeEl.textContent = rarity;
-
-      card.classList.add("flip");
-
       document.querySelectorAll(".card").forEach(c => {
         c.classList.remove("active-card");
         c.classList.add("dim");
       });
 
       card.classList.add("active-card");
+
+      // =========================
+      // 🔥 SSR 분기
+      // =========================
+      if (rarity === "SSR" && window.ssr?.play) {
+
+        ssrMode = true; // 🔥 render freeze ON
+
+        window.ssr.play(card, rarity, () => {
+          imgEl.src = img;
+          badgeEl.textContent = rarity;
+
+          if (isNew(img)) {
+            const tag = document.createElement("div");
+            tag.className = "new-badge";
+            tag.innerText = "NEW";
+            card.appendChild(tag);
+          }
+
+          saveToCollection({ rarity, img, time: Date.now() });
+
+          ssrMode = false; // 🔥 freeze OFF
+          render();
+        });
+
+        return;
+      }
+
+      // =========================
+      // 일반 카드
+      // =========================
+      imgEl.src = img;
+      badgeEl.textContent = rarity;
+
+      card.classList.add("flip");
 
       if (isNew(img)) {
         const tag = document.createElement("div");
@@ -143,7 +187,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function render() {
-    const cards = document.querySelectorAll(".card"); // 🔥 매번 재조회
+
+    // =========================
+    // 🔥 SSR 중엔 render 완전 정지
+    // =========================
+    if (ssrMode) return;
+
+    const cards = document.querySelectorAll(".card");
 
     const hasSelection = document.querySelector(".active-card");
 

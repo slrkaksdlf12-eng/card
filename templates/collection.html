@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
-<title>Collection</title>
+  <title data-i18n="collection_title">Collection</title>
 
-<!-- ✅ collection 전용 CSS -->
-<link rel="stylesheet" href="/static/css/collection.css">
+  <link rel="stylesheet" href="/static/css/collection.css">
 
-<!-- JS -->
-<script src="/static/js/collection.js" defer></script>
 
+  <script src="/static/js/collection.js" defer></script>
 </head>
 
 <body>
 
 <div class="wrap">
 
-  <button class="back-btn" onclick="location.href='/'">BACK</button>
+  <button class="back-btn" onclick="location.href='/'" data-i18n="back">
+    BACK
+  </button>
 
   <div id="collectionArea"></div>
 
