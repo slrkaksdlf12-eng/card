@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import os
@@ -16,6 +17,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://jmdraw_user:hU1yO5dG24zFku
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# =====================
+# MIGRATE
+# =====================
+migrate = Migrate(app, db)
 
 # -------------------
 # USER MODEL
@@ -105,7 +111,6 @@ def intro():
 def lobby():
     if "user" not in session:
         return redirect(url_for("login"))
-
     return render_template("lobby.html")
 
 
@@ -116,7 +121,6 @@ def lobby():
 def gacha():
     if "user" not in session:
         return redirect(url_for("login"))
-
     return render_template("gacha.html")
 
 
@@ -127,7 +131,6 @@ def gacha():
 def collection():
     if "user" not in session:
         return redirect(url_for("login"))
-
     return render_template("collection.html")
 
 
@@ -154,7 +157,7 @@ def get_lang(lang):
 
 
 # =====================================================
-# 🎯 GACHA API (DB 저장 핵심)
+# 🎯 GACHA API
 # =====================================================
 @app.route("/api/gacha", methods=["POST"])
 def api_gacha():
@@ -204,13 +207,6 @@ def manifest():
 @app.route("/sw.js")
 def service_worker():
     return send_from_directory("static/js", "sw.js")
-
-
-# =====================================================
-# INIT DB
-# =====================================================
-with app.app_context():
-    db.create_all()
 
 
 # =====================================================
