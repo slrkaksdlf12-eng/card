@@ -25,7 +25,12 @@ html, body {
   background-size: cover;
 }
 
-canvas { pointer-events: none; }
+canvas {
+  pointer-events: none;   /* 기존 유지 */
+  position: fixed;        /* 추가 */
+  inset: 0;               /* 추가 */
+  z-index: 1;             /* 추가 */
+}
 
 /* UI */
 .ui {
@@ -34,7 +39,6 @@ canvas { pointer-events: none; }
   z-index: 10;
 }
 
-/* 중앙 */
 .center {
   position: absolute;
   left: 50%;
@@ -89,7 +93,6 @@ canvas { pointer-events: none; }
   display: flex;
 }
 
-/* row */
 .row {
   display: flex;
   justify-content: space-between;
@@ -119,12 +122,6 @@ canvas { pointer-events: none; }
   font-size: 11px;
   color: rgba(255,255,255,0.5);
   white-space: nowrap;
-}
-
-.switch .onActive,
-.switch .offActive {
-  color: white;
-  font-weight: 600;
 }
 
 .knob {
@@ -165,7 +162,6 @@ canvas { pointer-events: none; }
   background: rgba(255,255,255,0.25);
 }
 
-/* logout */
 .logout {
   padding: 12px;
   text-align: center;
@@ -192,10 +188,8 @@ canvas { pointer-events: none; }
     <div class="btn" id="btn_settings" onclick="togglePanel()"></div>
   </div>
 
-  <!-- panel -->
   <div id="panel" class="panel">
 
-    <!-- SOUND -->
     <div class="row">
       <div id="txt_sound"></div>
 
@@ -206,7 +200,6 @@ canvas { pointer-events: none; }
       </div>
     </div>
 
-    <!-- LANG -->
     <div class="row">
       <div id="txt_lang"></div>
 
@@ -223,8 +216,7 @@ canvas { pointer-events: none; }
 
 <script>
 
-/* ================= LANG ================= */
-
+/* LANG */
 const dicts = {
   ko: {
     btn_gacha: "카드 뽑기",
@@ -266,29 +258,25 @@ function setLang(l) {
   applyLang();
 }
 
-/* ================= SOUND ================= */
-
+/* SOUND */
 let sound = true;
-
 function toggleSound() {
   sound = !sound;
   document.getElementById("soundSwitch").classList.toggle("on", sound);
 }
 
-/* ================= PANEL ================= */
-
+/* PANEL */
 function togglePanel() {
   document.getElementById("panel").classList.toggle("open");
 }
 
-/* ================= INIT ================= */
-
+/* INIT */
 window.addEventListener("DOMContentLoaded", () => {
   applyLang();
   document.getElementById("soundSwitch").classList.toggle("on", sound);
 });
 
-/* ================= PARTICLES (원본 유지 + 마우스 연결 복구) ================= */
+/* ================= PARTICLES ================= */
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -299,22 +287,37 @@ let particles = [];
 
 let mouse = { x: null, y: null };
 
+/* PC */
 window.addEventListener("mousemove", e => {
   mouse.x = e.clientX;
   mouse.y = e.clientY;
 });
 
+/* MOBILE FIX */
+window.addEventListener("touchstart", e => {
+  mouse.x = e.touches[0].clientX;
+  mouse.y = e.touches[0].clientY;
+});
+
+window.addEventListener("touchmove", e => {
+  mouse.x = e.touches[0].clientX;
+  mouse.y = e.touches[0].clientY;
+});
+
+/* resize */
 function resize() {
   w = window.innerWidth;
   h = window.innerHeight;
 
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-
   canvas.style.width = w + "px";
   canvas.style.height = h + "px";
 
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+
+  ctx.resetTransform();
+  ctx.scale(dpr, dpr);
+
   init();
 }
 
@@ -335,7 +338,8 @@ function init() {
 window.addEventListener("resize", resize);
 resize();
 
-function draw(){
+/* draw */
+function draw() {
   ctx.clearRect(0,0,w,h);
 
   for (let p of particles) {
@@ -351,15 +355,15 @@ function draw(){
     ctx.fillStyle="rgba(255,255,255,0.8)";
     ctx.fill();
 
-    /* 🔥 마우스 연결 */
-    if (mouse.x) {
+    /* line */
+    if (mouse.x !== null) {
       let dx = p.x - mouse.x;
       let dy = p.y - mouse.y;
       let d2 = dx*dx + dy*dy;
 
       if (d2 < 160*160) {
         ctx.beginPath();
-        ctx.strokeStyle="rgba(255,255,255,0.25)";
+        ctx.strokeStyle = "rgba(255,255,255,0.25)";
         ctx.moveTo(p.x,p.y);
         ctx.lineTo(mouse.x,mouse.y);
         ctx.stroke();
