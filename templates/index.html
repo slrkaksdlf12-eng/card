@@ -3,9 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+
 <title>App Login</title>
 
-<link rel="manifest" href="/manifest.json">
+<!-- PWA MANIFEST -->
+<link rel="manifest" href="/manifest.json?v=1">
+
+<!-- ICON HINT (삼성 브라우저 필수급) -->
+<link rel="icon" href="/static/assets/images/icon-192.png">
+<link rel="apple-touch-icon" href="/static/assets/images/icon-192.png">
+
+<meta name="theme-color" content="#0f0f1a">
 
 <style>
 html, body {
@@ -113,7 +121,6 @@ a:hover {
 .lang {
     position: absolute;
     bottom: 20px;
-
     display: flex;
     gap: 10px;
 }
@@ -166,12 +173,13 @@ a:hover {
 
 </div>
 
-<!-- 기존 i18n 로직 유지 -->
+<!-- i18n -->
 <script src="/static/js/app.js"></script>
 
+<!-- SW (개발 중엔 끄는 게 안정적) -->
 <script>
 if ("serviceWorker" in navigator) {
-    //navigator.serviceWorker.register("/sw.js");
+    // navigator.serviceWorker.register("/static/js/sw.js");
 }
 </script>
 
