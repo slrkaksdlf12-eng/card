@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import os
+import random
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "card_secret_key"
@@ -20,20 +23,33 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(80), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 # -------------------
-# LOGIN PAGE
+# COLLECTION MODEL
 # -------------------
+class Collection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    rarity = db.Column(db.String(10))  # N / SR / SSR
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# =====================================================
+# LOGIN PAGE
+# =====================================================
 @app.route("/")
 def login():
     if "user" in session:
         return redirect(url_for("lobby"))
     return render_template("index.html")
 
-# -------------------
-# REGISTER PAGE
-# -------------------
+
+# =====================================================
+# REGISTER
+# =====================================================
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -44,7 +60,11 @@ def register():
         if existing:
             return redirect(url_for("register"))
 
-        user = User(username=username, password=password)
+        user = User(
+            username=username,
+            password_hash=generate_password_hash(password)
+        )
+
         db.session.add(user)
         db.session.commit()
 
@@ -52,42 +72,46 @@ def register():
 
     return render_template("register.html")
 
-# -------------------
+
+# =====================================================
 # LOGIN ACTION
-# -------------------
+# =====================================================
 @app.route("/login", methods=["POST"])
 def login_post():
     username = request.form["username"]
     password = request.form["password"]
 
-    user = User.query.filter_by(username=username, password=password).first()
+    user = User.query.filter_by(username=username).first()
 
-    if user:
-        session["user"] = username
-        return redirect(url_for("intro"))
-    else:
-        return redirect(url_for("login"))
+    if user and check_password_hash(user.password_hash, password):
+        session["user"] = user.id
+        return redirect(url_for("lobby"))
 
-# -------------------
+    return redirect(url_for("login"))
+
+
+# =====================================================
 # INTRO
-# -------------------
+# =====================================================
 @app.route("/intro")
 def intro():
     return render_template("intro.html")
 
-# -------------------
+
+# =====================================================
 # LOBBY
-# -------------------
+# =====================================================
 @app.route("/lobby")
 def lobby():
     if "user" not in session:
         return redirect(url_for("login"))
 
-    return render_template("lobby.html", user=session["user"])
+    return render_template("lobby.html")
 
-# -------------------
-# GACHA
-# -------------------
+
+# =====================================================
+# GACHA PAGE
+# =====================================================
 @app.route("/gacha")
 def gacha():
     if "user" not in session:
@@ -95,20 +119,26 @@ def gacha():
 
     return render_template("gacha.html")
 
-# -------------------
-# COLLECTION
-# -------------------
+
+# =====================================================
+# COLLECTION PAGE
+# =====================================================
 @app.route("/collection")
 def collection():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
     return render_template("collection.html")
 
-# -------------------
+
+# =====================================================
 # LOGOUT
-# -------------------
+# =====================================================
 @app.route("/logout")
 def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
+
 
 # =====================================================
 # 🌏 I18N API
@@ -118,32 +148,74 @@ def get_lang(lang):
     try:
         path = os.path.join("static", "lang", f"{lang}.json")
         with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return jsonify(data)
-    except Exception:
+            return jsonify(json.load(f))
+    except:
         return jsonify({})
 
-# =====================================================
-# 🚀 PWA SUPPORT (추가된 부분)
-# =====================================================
 
-# manifest.json 서빙
+# =====================================================
+# 🎯 GACHA API (DB 저장 핵심)
+# =====================================================
+@app.route("/api/gacha", methods=["POST"])
+def api_gacha():
+    if "user" not in session:
+        return jsonify({"error": "unauthorized"}), 401
+
+    result = random.choice(["N", "SR", "SSR"])
+
+    card = Collection(
+        user_id=session["user"],
+        rarity=result
+    )
+
+    db.session.add(card)
+    db.session.commit()
+
+    return jsonify({"result": result})
+
+
+# =====================================================
+# 📦 COLLECTION API
+# =====================================================
+@app.route("/api/collection")
+def api_collection():
+    if "user" not in session:
+        return jsonify([])
+
+    cards = Collection.query.filter_by(user_id=session["user"]).all()
+
+    return jsonify([
+        {
+            "rarity": c.rarity,
+            "time": c.created_at.isoformat()
+        }
+        for c in cards
+    ])
+
+
+# =====================================================
+# PWA SUPPORT
+# =====================================================
 @app.route("/manifest.json")
 def manifest():
     return send_from_directory("static", "manifest.json")
 
-# service worker 서빙
+
 @app.route("/sw.js")
 def service_worker():
     return send_from_directory("static/js", "sw.js")
 
 
-# -------------------
-# RUN (Render용)
-# -------------------
+# =====================================================
+# INIT DB
+# =====================================================
 with app.app_context():
     db.create_all()
 
+
+# =====================================================
+# RUN
+# =====================================================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

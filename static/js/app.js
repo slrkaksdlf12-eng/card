@@ -11,7 +11,7 @@ async function setLanguage(lang) {
 }
 
 // -----------------------
-// 언어 로드 (API 방식)
+// 언어 로드
 // -----------------------
 async function loadLanguage() {
     try {
@@ -31,12 +31,12 @@ async function loadLanguage() {
 }
 
 // -----------------------
-// UI 렌더링 (WebView 안정화)
+// UI 렌더링
 // -----------------------
 function renderUI() {
-
     if (!document.body) return;
 
+    // 1) data-i18n
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.getAttribute("data-i18n");
         if (dict[key]) {
@@ -44,6 +44,7 @@ function renderUI() {
         }
     });
 
+    // 2) placeholder
     document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
         const key = el.getAttribute("data-i18n-placeholder");
         if (dict[key]) {
@@ -51,42 +52,36 @@ function renderUI() {
         }
     });
 
+    // 3) ⭐ 페이지별 title (이제 자동추측 제거)
     const title = document.getElementById("title");
-    if (title) {
-        title.innerText =
-            dict.login_title ||
-            dict.register_title ||
-            dict.lobby_title ||
-            dict.gacha_title ||
-            "App";
+    if (title && title.dataset.key) {
+        const key = title.dataset.key;
+        if (dict[key]) title.innerText = dict[key];
     }
 
+    // 4) ⭐ 버튼도 페이지에서 지정
     const btn = document.getElementById("btn");
-    if (btn) {
-        btn.innerText =
-            dict.login_btn ||
-            dict.register_btn ||
-            dict.start_btn ||
-            dict.draw_btn ||
-            "";
+    if (btn && btn.dataset.key) {
+        const key = btn.dataset.key;
+        if (dict[key]) btn.innerText = dict[key];
     }
 
+    // 5) subtitle
     const subtitle = document.getElementById("subtitle");
-    if (subtitle) subtitle.innerText = dict.subtitle || "";
+    if (subtitle && dict.subtitle) {
+        subtitle.innerText = dict.subtitle;
+    }
 
+    // 6) result
     const resultLabel = document.getElementById("resultLabel");
-    if (resultLabel) resultLabel.innerText = dict.result || "";
-
-    const username = document.getElementById("username");
-    if (username && dict.username) username.placeholder = dict.username;
-
-    const password = document.getElementById("password");
-    if (password && dict.password) password.placeholder = dict.password;
+    if (resultLabel && dict.result) {
+        resultLabel.innerText = dict.result;
+    }
 }
 
-// ======================================================
-// 🔥 CARD DRAW (여기 "저장 기능" 추가)
-// ======================================================
+// -----------------------
+// CARD DRAW
+// -----------------------
 function draw() {
     const cards = ["N", "SR", "SSR"];
     const result = cards[Math.floor(Math.random() * cards.length)];
@@ -101,7 +96,6 @@ function draw() {
         el.innerText = result;
         el.style.transform = "scale(1.3)";
 
-        // 🔥 여기가 핵심 추가
         saveToCollection(result);
 
         setTimeout(() => {
@@ -110,9 +104,9 @@ function draw() {
     }, 800);
 }
 
-// ======================================================
-// 🔥 COLLECTION 저장 추가 (핵심)
-// ======================================================
+// -----------------------
+// COLLECTION 저장
+// -----------------------
 function saveToCollection(rarity) {
     const list = JSON.parse(localStorage.getItem("collection") || "[]");
 

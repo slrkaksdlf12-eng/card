@@ -1,93 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>App Login</title>
 
-    <link rel="stylesheet" href="/static/css/style.css">
+<link rel="manifest" href="/static/manifest.json">
 
-    <!-- ✅ PWA: manifest 추가 -->
-    <link rel="manifest" href="/static/manifest.json">
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, #0f0f1a, #1b1b2e);
-            color: white;
-        }
+    background: radial-gradient(circle at top, #1b1b2e, #0f0f1a);
+    color: white;
+    overflow: hidden;
+}
 
-        .app {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+/* 전체 레이아웃 */
+.app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
 
-        h1 {
-            font-size: 28px;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-        }
+/* 타이틀 */
+h1 {
+    font-size: 26px;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+}
 
-        form {
-            width: 100%;
-            max-width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+/* 로그인 카드 */
+form {
+    width: 92%;
+    max-width: 360px;
 
-        input {
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 
-        button {
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            background: #6c5ce7;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    padding: 22px;
 
-        button:active {
-            transform: scale(0.98);
-        }
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
 
-        a {
-            margin-top: 15px;
-            color: #aaa;
-            font-size: 13px;
-            text-decoration: none;
-        }
+    backdrop-filter: blur(12px);
+}
 
-        a:hover {
-            color: white;
-        }
+/* input */
+input {
+    padding: 14px;
+    border-radius: 10px;
 
-        .lang {
-            position: absolute;
-            bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.25);
 
-        .lang button {
-            padding: 8px 12px;
-            font-size: 12px;
-            background: rgba(255,255,255,0.1);
-        }
-    </style>
+    color: white;
+    font-size: 14px;
+
+    outline: none;
+    transition: 0.2s ease;
+}
+
+input:focus {
+    border-color: rgba(108,92,231,0.8);
+    box-shadow: 0 0 10px rgba(108,92,231,0.3);
+    transform: scale(1.02);
+}
+
+/* 버튼 */
+button {
+    padding: 14px;
+    border-radius: 10px;
+
+    border: none;
+    background: linear-gradient(135deg, #6c5ce7, #8e7bff);
+
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+/* 링크 */
+a {
+    margin-top: 14px;
+    color: #aaa;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+a:hover {
+    color: white;
+}
+
+/* 언어 선택 */
+.lang {
+    position: absolute;
+    bottom: 20px;
+
+    display: flex;
+    gap: 10px;
+}
+
+.lang button {
+    padding: 8px 14px;
+    font-size: 12px;
+
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+
+    background: rgba(255,255,255,0.08);
+    color: white;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.lang button:active {
+    transform: scale(0.95);
+}
+</style>
 </head>
 
 <body>
@@ -100,17 +148,17 @@
     <!-- LOGIN FORM -->
     <form action="/login" method="POST">
 
-        <input id="username" name="username" data-i18n-placeholder="username">
-        <input id="password" name="password" type="password" data-i18n-placeholder="password">
+        <input name="username" data-i18n-placeholder="username" autocomplete="username">
+        <input name="password" type="password" data-i18n-placeholder="password" autocomplete="current-password">
 
-        <button id="btn" type="submit" data-i18n="login_btn"></button>
+        <button type="submit" data-i18n="login_btn"></button>
 
     </form>
 
     <!-- REGISTER -->
-    <a href="/register" id="register_link" data-i18n="register_link"></a>
+    <a href="/register" data-i18n="register_link"></a>
 
-    <!-- 🌏 언어 선택 -->
+    <!-- LANG -->
     <div class="lang">
         <button onclick="setLanguage('ko')">KO</button>
         <button onclick="setLanguage('ja')">JA</button>
@@ -118,10 +166,9 @@
 
 </div>
 
-<!-- 기존 앱 JS -->
+<!-- 기존 i18n 로직 유지 -->
 <script src="/static/js/app.js"></script>
 
-<!-- ✅ PWA: service worker 등록 -->
 <script>
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/static/sw.js");
