@@ -14,124 +14,165 @@ html, body {
   overflow: hidden;
   background: #000;
   font-family: sans-serif;
-  touch-action: none;
-  color: white;
 }
 
+/* 배경 */
 #bg {
   position: fixed;
   inset: 0;
   z-index: 0;
-
   background: url("/static/assets/images/1.png") no-repeat center center;
   background-size: cover;
 }
 
-canvas {
-pointer-events: none;
-}
+canvas { pointer-events: none; }
 
+/* UI */
 .ui {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 10;
-  width: 100%;
-  height: 100%;
 }
 
-.orbit {
-  position: absolute;
-  left: 45%;
-  top: 50%;
-  width: 1px;
-  height: 1px;
-}
-
-.star-btn,
-.settings-btn {
-  position: absolute;
-
-  width: 140px;
-  padding: 12px;
-
-  border-radius: 14px;
-
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.15);
-
-  backdrop-filter: blur(8px);
-
-  color: white;
-  font-size: 13px;
-  text-align: center;
-
-  box-shadow: 0 0 20px rgba(255,255,255,0.05);
-
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%   { transform: translate(var(--x), var(--y)) translate(0px, 0px); }
-  20%  { transform: translate(var(--x), var(--y)) translate(6px, -5px); }
-  40%  { transform: translate(var(--x), var(--y)) translate(-4px, 6px); }
-  60%  { transform: translate(var(--x), var(--y)) translate(7px, 4px); }
-  80%  { transform: translate(var(--x), var(--y)) translate(-6px, -3px); }
-  100% { transform: translate(var(--x), var(--y)) translate(0px, 0px); }
-}
-
-.btn2 { --x: 0vw; --y: -12vh; }
-.btn3 { --x: 0vw; --y: 10vh; }
-
-.settings-btn {
-  --x: 0vw;
-  --y: 24vh;
-}
-
-.settings-panel {
+/* 중앙 */
+.center {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(120px, 175px);
-
-  width: 170px;
-
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-
-  padding: 10px;
-
-  background: rgba(10,10,20,0.92);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-
-  opacity: 0;
-  pointer-events: none;
-
-  transition: 0.2s ease;
+  align-items: center;
 }
 
-.settings-panel.open {
-  opacity: 1;
-  pointer-events: auto;
-}
+/* 버튼 */
+.btn {
+  width: 220px;
+  height: 56px;
+  margin: 10px 0;
 
-.settings-panel button {
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.06);
-  border: none;
+
   color: white;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: left;
-  font-size: 12px;
-}
+  font-size: 15px;
 
-.lang-row {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
 }
 
-.lang-row button {
+/* 패널 */
+.panel {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 190px);
+  transform: translateX(-50%);
+
+  width: 300px;
+  padding: 14px;
+
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+
+  background: rgba(15,15,25,0.92);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+}
+
+.panel.open {
+  display: flex;
+}
+
+/* row */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  font-size: 13px;
+}
+
+/* SWITCH */
+.switch {
+  width: 120px;
+  height: 38px;
+  border-radius: 20px;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+}
+
+.switch .side {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+}
+
+.switch .onActive,
+.switch .offActive {
+  color: white;
+  font-weight: 600;
+}
+
+.knob {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background: rgba(255,255,255,0.18);
+  transition: 0.25s ease;
+  left: 0;
+}
+
+.switch.on .knob {
+  left: 50%;
+}
+
+/* LANG */
+.lang {
+  display: flex;
+  width: 170px;
+  height: 42px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.lang div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  background: rgba(255,255,255,0.06);
+  color: white;
+  white-space: nowrap;
+}
+
+.lang .active {
+  background: rgba(255,255,255,0.25);
+}
+
+/* logout */
+.logout {
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  background: rgba(255,80,80,0.15);
+  color: white;
+  cursor: pointer;
 }
 </style>
 
@@ -144,94 +185,124 @@ pointer-events: none;
 </div>
 
 <div class="ui">
-  <div class="orbit">
 
-    <button id="btn_gacha" class="star-btn btn2" onclick="location.href='/gacha'">引く</button>
-    <button id="btn_collection" class="star-btn btn3" onclick="location.href='/collection'">コレクション</button>
+  <div class="center">
+    <div class="btn" id="btn_gacha" onclick="location.href='/gacha'"></div>
+    <div class="btn" id="btn_collection" onclick="location.href='/collection'"></div>
+    <div class="btn" id="btn_settings" onclick="togglePanel()"></div>
+  </div>
 
-    <div class="settings-btn" onclick="toggleSettings()">
-      <span id="btn_settings">設定</span>
-    </div>
+  <!-- panel -->
+  <div id="panel" class="panel">
 
-    <div id="settingsPanel" class="settings-panel">
+    <!-- SOUND -->
+    <div class="row">
+      <div id="txt_sound"></div>
 
-      <div style="font-size:12px; opacity:0.7;" id="txt_settings">設定</div>
-
-      <button onclick="toggleSound()" id="btn_sound">音: ON</button>
-
-      <div class="lang-row">
-        <button onclick="setLanguage('ko')">한국어</button>
-        <button onclick="setLanguage('ja')">日本語</button>
+      <div class="switch" id="soundSwitch" onclick="toggleSound()">
+        <div class="knob"></div>
+        <div class="side on">ON</div>
+        <div class="side off">OFF</div>
       </div>
-
-      <button onclick="location.href='/logout'" id="btn_logout">ログアウト</button>
-
     </div>
+
+    <!-- LANG -->
+    <div class="row">
+      <div id="txt_lang"></div>
+
+      <div class="lang">
+        <div id="koBtn" onclick="setLang('ko')">한국어</div>
+        <div id="jaBtn" onclick="setLang('ja')">日本語</div>
+      </div>
+    </div>
+
+    <div class="logout" id="logout_btn" onclick="location.href='/logout'"></div>
 
   </div>
 </div>
 
 <script>
-function toggleSettings() {
-  document.getElementById("settingsPanel").classList.toggle("open");
+
+/* ================= LANG ================= */
+
+const dicts = {
+  ko: {
+    btn_gacha: "카드 뽑기",
+    btn_collection: "컬렉션",
+    btn_settings: "설정",
+    txt_sound: "소리",
+    txt_lang: "언어",
+    logout_btn: "로그아웃"
+  },
+  ja: {
+    btn_gacha: "カードを引く",
+    btn_collection: "コレクション",
+    btn_settings: "設定",
+    txt_sound: "音",
+    txt_lang: "言語",
+    logout_btn: "ログアウト"
+  }
+};
+
+let lang = localStorage.getItem("lang") || "ko";
+
+function applyLang() {
+  const d = dicts[lang];
+
+  document.getElementById("btn_gacha").innerText = d.btn_gacha;
+  document.getElementById("btn_collection").innerText = d.btn_collection;
+  document.getElementById("btn_settings").innerText = d.btn_settings;
+  document.getElementById("txt_sound").innerText = d.txt_sound;
+  document.getElementById("txt_lang").innerText = d.txt_lang;
+  document.getElementById("logout_btn").innerText = d.logout_btn;
+
+  document.getElementById("koBtn").classList.toggle("active", lang === "ko");
+  document.getElementById("jaBtn").classList.toggle("active", lang === "ja");
 }
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem("lang", l);
+  applyLang();
+}
+
+/* ================= SOUND ================= */
 
 let sound = true;
+
 function toggleSound() {
   sound = !sound;
-  alert(sound ? "Sound: " + (sound ? "ON" : "OFF") : "");
+  document.getElementById("soundSwitch").classList.toggle("on", sound);
 }
 
-let currentLang = localStorage.getItem("lang") || "ko";
-let dict = {};
+/* ================= PANEL ================= */
 
-async function setLanguage(lang) {
-  currentLang = lang;
-  localStorage.setItem("lang", lang);
-  await loadLanguage();
+function togglePanel() {
+  document.getElementById("panel").classList.toggle("open");
 }
 
-async function loadLanguage() {
-  try {
-    const res = await fetch(`/api/lang/${currentLang}`);
-    dict = await res.json();
-    applyLanguage();
-  } catch (e) {}
-}
+/* ================= INIT ================= */
 
-/* ✅ 여기만 핵심 수정 */
-function applyLanguage() {
+window.addEventListener("DOMContentLoaded", () => {
+  applyLang();
+  document.getElementById("soundSwitch").classList.toggle("on", sound);
+});
 
-  if (!dict) return;
+/* ================= PARTICLES (원본 유지 + 마우스 연결 복구) ================= */
 
-  const map = {
-    btn_gacha: "btn_gacha",
-    btn_collection: "btn_collection",
-    btn_settings: "btn_settings",
-    txt_settings: "txt_settings",
-    btn_sound: "btn_sound",
-    btn_logout: "logout"
-  };
-
-  for (let id in map) {
-    const el = document.getElementById(id);
-    const key = map[id];
-
-    if (el && dict[key]) {
-      el.innerText = dict[key];
-    }
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadLanguage);
-
-/* particle 그대로 */
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const dpr = window.devicePixelRatio || 1;
-let w,h;
+let w, h;
 let particles = [];
+
+let mouse = { x: null, y: null };
+
+window.addEventListener("mousemove", e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
 
 function resize() {
   w = window.innerWidth;
@@ -244,13 +315,12 @@ function resize() {
   canvas.style.height = h + "px";
 
   ctx.setTransform(dpr,0,0,dpr,0,0);
-
   init();
 }
 
 function init() {
   particles = [];
-  const count = Math.min(130, Math.floor((w*h)/10000));
+  const count = Math.min(120, Math.floor((w*h)/10000));
 
   for (let i=0;i<count;i++) {
     particles.push({
@@ -265,59 +335,29 @@ function init() {
 window.addEventListener("resize", resize);
 resize();
 
-let mouse={x:null,y:null};
-
-window.addEventListener("mousemove", e=>{
-  mouse.x=e.clientX;
-  mouse.y=e.clientY;
-});
-
-window.addEventListener("touchmove", e=>{
-  mouse.x=e.touches[0].clientX;
-  mouse.y=e.touches[0].clientY;
-},{passive:true});
-
-const LINK=120;
-const MOUSE=160;
-
 function draw(){
   ctx.clearRect(0,0,w,h);
 
-  for(let i=0;i<particles.length;i++){
-    let p=particles[i];
+  for (let p of particles) {
 
-    p.x+=p.vx;
-    p.y+=p.vy;
+    p.x += p.vx;
+    p.y += p.vy;
 
-    if(p.x<0||p.x>w)p.vx*=-1;
-    if(p.y<0||p.y>h)p.vy*=-1;
+    if (p.x<0||p.x>w) p.vx*=-1;
+    if (p.y<0||p.y>h) p.vy*=-1;
 
     ctx.beginPath();
     ctx.arc(p.x,p.y,2,0,Math.PI*2);
-    ctx.fillStyle="rgba(255,255,255,0.85)";
+    ctx.fillStyle="rgba(255,255,255,0.8)";
     ctx.fill();
 
-    for(let j=i+1;j<particles.length;j++){
-      let p2=particles[j];
-      let dx=p.x-p2.x;
-      let dy=p.y-p2.y;
-      let d2=dx*dx+dy*dy;
+    /* 🔥 마우스 연결 */
+    if (mouse.x) {
+      let dx = p.x - mouse.x;
+      let dy = p.y - mouse.y;
+      let d2 = dx*dx + dy*dy;
 
-      if(d2<LINK*LINK){
-        ctx.beginPath();
-        ctx.strokeStyle="rgba(255,255,255,0.12)";
-        ctx.moveTo(p.x,p.y);
-        ctx.lineTo(p2.x,p2.y);
-        ctx.stroke();
-      }
-    }
-
-    if(mouse.x){
-      let dx=p.x-mouse.x;
-      let dy=p.y-mouse.y;
-      let d2=dx*dx+dy*dy;
-
-      if(d2<MOUSE*MOUSE){
+      if (d2 < 160*160) {
         ctx.beginPath();
         ctx.strokeStyle="rgba(255,255,255,0.25)";
         ctx.moveTo(p.x,p.y);
@@ -331,6 +371,7 @@ function draw(){
 }
 
 draw();
+
 </script>
 
 </body>
