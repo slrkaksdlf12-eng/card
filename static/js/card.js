@@ -23,17 +23,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const pool = Array.from({ length: 10 });
 
   let locked = false;
-
-  // =========================
-  // 🔥 SSR render freeze flag 추가
-  // =========================
   let ssrMode = false;
 
+  /* =========================================================
+     🎲 RARITY SYSTEM (SSR 5% / SR 15% / N 80%)
+  ========================================================= */
   function getRarity() {
     const r = Math.random() * 100;
-    if (r < 70) return "N";
-    if (r < 95) return "SR";
-    return "SSR";
+
+    if (r < 5) return "SSR";
+    if (r < 20) return "SR";
+    return "N";
   }
 
   const IMAGE_POOL = {
@@ -45,11 +45,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   function getImage(rarity) {
     const count = IMAGE_POOL[rarity];
 
-    const folder = rarity === "N"
-      ? "a"
-      : rarity === "SR"
-      ? "b"
-      : "c";
+    const folder =
+      rarity === "N" ? "a" :
+      rarity === "SR" ? "b" :
+      "c";
 
     const idx = Math.floor(Math.random() * count) + 1;
 
@@ -72,6 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function createCard() {
+
     const rarity = getRarity();
     const img = getImage(rarity);
 
@@ -117,23 +117,50 @@ document.addEventListener("DOMContentLoaded", async () => {
       // =========================
       if (rarity === "SSR" && window.ssr?.play) {
 
-        ssrMode = true; // 🔥 render freeze ON
+        ssrMode = true;
 
         window.ssr.play(card, rarity, () => {
-          imgEl.src = img;
-          badgeEl.textContent = rarity;
 
-          if (isNew(img)) {
-            const tag = document.createElement("div");
-            tag.className = "new-badge";
-            tag.innerText = "NEW";
-            card.appendChild(tag);
-          }
+          setTimeout(() => {
 
-          saveToCollection({ rarity, img, time: Date.now() });
+            const finalImg = getImage(rarity);
 
-          ssrMode = false; // 🔥 freeze OFF
-          render();
+            const imgEl = card.querySelector(".img");
+            const badgeEl = card.querySelector(".badge");
+
+            if (imgEl) imgEl.src = finalImg;
+            if (badgeEl) badgeEl.textContent = rarity;
+
+            card.style.transition = "transform 0.6s ease, opacity 0.6s ease";
+            card.style.transform = `
+              translate(-50%, -50%)
+              translate3d(0px, 0px, 200px)
+              scale(1.4)
+            `;
+            card.style.opacity = "1";
+
+            requestAnimationFrame(() => {
+              card.classList.add("flip");
+            });
+
+            if (isNew(finalImg)) {
+              const tag = document.createElement("div");
+              tag.className = "new-badge";
+              tag.innerText = "NEW";
+              card.appendChild(tag);
+            }
+
+            saveToCollection({
+              rarity,
+              img: finalImg,
+              time: Date.now()
+            });
+
+            ssrMode = false;
+            render();
+
+          }, 3000);
+
         });
 
         return;
@@ -188,13 +215,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function render() {
 
-    // =========================
-    // 🔥 SSR 중엔 render 완전 정지
-    // =========================
     if (ssrMode) return;
 
     const cards = document.querySelectorAll(".card");
-
     const hasSelection = document.querySelector(".active-card");
 
     cards.forEach((card, i) => {

@@ -1,266 +1,320 @@
-// ssr.js
 window.ssr = (() => {
 
-  let ssrLayer;
-  let cardArea;
-  let state = "idle";
-
-  let glState = {
-    canvas: null,
-    gl: null,
-    running: false,
-    raf: null
-  };
-
-  function init() {
-    ssrLayer = document.getElementById("ssrLayer");
-    cardArea = document.getElementById("cardArea");
-
-    if (!ssrLayer) {
-      ssrLayer = document.createElement("div");
-      ssrLayer.id = "ssrLayer";
-      document.body.appendChild(ssrLayer);
-    }
+  function getOverlay() {
+    return document.getElementById("ssrOverlay");
   }
 
-  function play(card, rarity, onComplete) {
-    if (state !== "idle") return;
+  function getBgLayer(overlay) {
+    let el = overlay.querySelector(".bg-layer");
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "bg-layer";
+      overlay.appendChild(el);
+    }
+    return el;
+  }
 
-    state = "playing";
-    init();
+  function getCardLayer(overlay) {
+    let el = overlay.querySelector(".card-layer");
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "card-layer";
+      overlay.appendChild(el);
+    }
+    return el;
+  }
 
-    if (cardArea) cardArea.style.display = "none";
+  /* =========================================================
+     🌪 CAMERA 3 STAGE ZOOM + PULSE
+  ========================================================= */
+  function cameraSequence(overlay) {
 
-    ssrLayer.style.display = "block";
-    ssrLayer.innerHTML = `
-      <canvas id="sakura"></canvas>
-      <div class="ssr-hint"></div>
-    `;
+    const cam = overlay.querySelector(".camera");
+    if (!cam) return;
 
-    startSakura();
+    cam.classList.remove("zoom-wide", "zoom-mid", "zoom-close");
+    void cam.offsetWidth;
+
+    overlay.style.transform = "scale(1.02)";
+
+    cam.classList.add("zoom-wide");
 
     setTimeout(() => {
-      reveal(card, rarity, onComplete);
-    }, 3000);
+      cam.classList.add("zoom-mid");
+    }, 150);
+
+    setTimeout(() => {
+      cam.classList.add("zoom-close");
+    }, 320);
+
+    setTimeout(() => {
+      overlay.style.transform = "";
+    }, 600);
   }
 
-  function reveal(card, rarity, onComplete) {
-    state = "reveal";
-
-    const img = card.querySelector(".img");
-    const badge = card.querySelector(".badge");
-
-    img.style.display = "block";
-    badge.textContent = rarity;
-
-    card.classList.add("ssr-reveal");
-
-    state = "done";
-
-    card.addEventListener("click", () => {
-      location.href = "/collection";
-    });
-
-    if (onComplete) onComplete();
+  /* =========================================================
+     🌫 UI DISTORTION (가챠 UI 왜곡)
+  ========================================================= */
+  function uiWarpStart(overlay) {
+    overlay.style.filter = "brightness(1.15) contrast(1.2) saturate(1.3) blur(0.2px)";
+    overlay.style.transform = "scale(1.01) skewX(-0.6deg)";
   }
 
-  // =========================
-  // 🌸 WEBGL (CodePen 구조 복원)
-  // =========================
-  function startSakura() {
-
-    const canvas = document.getElementById("sakura");
-    if (!canvas) return;
-
-    const gl = canvas.getContext("webgl", {
-      alpha: true,
-      premultipliedAlpha: false
-    });
-
-    if (!gl) return;
-
-    glState.canvas = canvas;
-    glState.gl = gl;
-
-    // =========================
-    // FBO SETUP (핵심)
-    // =========================
-    const fbo = gl.createFramebuffer();
-    const colorTex = gl.createTexture();
-    const depthBuffer = gl.createRenderbuffer();
-
-    function initFBO() {
-
-      gl.bindTexture(gl.TEXTURE_2D, colorTex);
-      gl.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGBA,
-        canvas.width, canvas.height,
-        0, gl.RGBA, gl.UNSIGNED_BYTE, null
-      );
-
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTex, 0);
-
-      gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
-
-      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
-
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    }
-
-    // =========================
-    // resize
-    // =========================
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      initFBO();
-    }
-
-    window.addEventListener("resize", resize);
-    resize();
-
-    // =========================
-    // shader utils
-    // =========================
-    function get(id) {
-      const el = document.getElementById(id);
-      return el ? el.textContent : "";
-    }
-
-    function compile(type, src) {
-      const s = gl.createShader(type);
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      return s;
-    }
-
-    function program(vs, fs) {
-      const p = gl.createProgram();
-      gl.attachShader(p, compile(gl.VERTEX_SHADER, get(vs)));
-      gl.attachShader(p, compile(gl.FRAGMENT_SHADER, get(fs)));
-      gl.linkProgram(p);
-      return p;
-    }
-
-    // =========================
-    // PROGRAMS
-    // =========================
-    const mainProgram   = program("sakura_point_vsh", "sakura_point_fsh");
-    const brightProgram  = program("fx_common_vsh", "fx_brightbuf_fsh");
-    const blurProgram    = program("fx_common_vsh", "fx_dirblur_r4_fsh");
-    const finalProgram   = program("pp_final_vsh", "pp_final_fsh");
-
-    // =========================
-    // QUAD
-    // =========================
-    const quadBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      -1,-1,  1,-1,  -1,1,  1,1
-    ]), gl.STATIC_DRAW);
-
-    // =========================
-    // PARTICLES
-    // =========================
-    const particleCount = 800;
-
-    const positions = new Float32Array(particleCount * 3);
-    const eulers = new Float32Array(particleCount * 3);
-    const misc = new Float32Array(particleCount * 2);
-
-    for (let i = 0; i < particleCount; i++) {
-      positions[i*3+0] = (Math.random()-0.5)*20;
-      positions[i*3+1] = Math.random()*10;
-      positions[i*3+2] = (Math.random()-0.5)*20;
-
-      eulers[i*3+0] = Math.random()*Math.PI;
-      eulers[i*3+1] = Math.random()*Math.PI;
-      eulers[i*3+2] = Math.random()*Math.PI;
-
-      misc[i*2+0] = Math.random()*2+1;
-      misc[i*2+1] = Math.random();
-    }
-
-    const posBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-    const eurBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, eurBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, eulers, gl.STATIC_DRAW);
-
-    const miscBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, miscBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, misc, gl.STATIC_DRAW);
-
-    // =========================
-    // DRAW LOOP (FBO → BLUR → FINAL)
-    // =========================
-    const uResolution = gl.getUniformLocation(mainProgram, "uResolution");
-
-    function draw() {
-
-      // 1. SCENE → FBO
-      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-
-      gl.useProgram(mainProgram);
-
-      gl.uniform3f(uResolution, canvas.width, canvas.height, canvas.width/canvas.height);
-
-      const aPos = gl.getAttribLocation(mainProgram, "aPosition");
-      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-      gl.enableVertexAttribArray(aPos);
-      gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
-
-      const aEuler = gl.getAttribLocation(mainProgram, "aEuler");
-      gl.bindBuffer(gl.ARRAY_BUFFER, eurBuffer);
-      gl.enableVertexAttribArray(aEuler);
-      gl.vertexAttribPointer(aEuler, 3, gl.FLOAT, false, 0, 0);
-
-      const aMisc = gl.getAttribLocation(mainProgram, "aMisc");
-      gl.bindBuffer(gl.ARRAY_BUFFER, miscBuffer);
-      gl.enableVertexAttribArray(aMisc);
-      gl.vertexAttribPointer(aMisc, 2, gl.FLOAT, false, 0, 0);
-
-      gl.drawArrays(gl.POINTS, 0, particleCount);
-
-      // 2. SCREEN PASS
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-      gl.useProgram(finalProgram);
-
-      const a1 = gl.getAttribLocation(finalProgram, "aPosition");
-      gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-      gl.enableVertexAttribArray(a1);
-      gl.vertexAttribPointer(a1, 2, gl.FLOAT, false, 0, 0);
-
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-      glState.raf = requestAnimationFrame(draw);
-    }
-
-    draw();
+  function uiWarpEnd(overlay) {
+    overlay.style.filter = "";
+    overlay.style.transform = "";
   }
 
-  function reset() {
-    state = "idle";
-    if (glState.raf) cancelAnimationFrame(glState.raf);
-
-    if (cardArea) cardArea.style.display = "block";
-
-    if (ssrLayer) {
-      ssrLayer.style.display = "none";
-      ssrLayer.innerHTML = "";
-    }
+  /* =========================================================
+     💓 SSR HEARTBEAT BURST
+  ========================================================= */
+  function heartbeatBurst(overlay) {
+    overlay.classList.add("heartbeat");
+    setTimeout(() => overlay.classList.remove("heartbeat"), 900);
   }
 
-  return { play, reset };
+  /* =========================================================
+     🌸 FLIP 이후 4단계 시스템
+     stick → slide → burst → drift
+  ========================================================= */
+  function spawnFlipSakuraBurst(card, overlay) {
+
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const layer = overlay.querySelector(".bg-layer");
+
+    const count = 140;
+
+    const petals = [];
+
+    for (let i = 0; i < count; i++) {
+
+      const p = document.createElement("div");
+      p.className = "sakura hit";
+
+      const angle = Math.random() * Math.PI * 2;
+
+      const stick = 15 + Math.random() * 40;
+      const slide = 80 + Math.random() * 220;
+      const burst = 220 + Math.random() * 420;
+
+      const x = Math.cos(angle) * (stick + slide + burst);
+      const y = Math.sin(angle) * (stick + slide + burst);
+
+      p.style.left = cx + "px";
+      p.style.top = cy + "px";
+
+      p.style.setProperty("--x", x + "px");
+      p.style.setProperty("--y", y + "px");
+
+      p.style.animationDuration = (0.7 + Math.random() * 1.2) + "s";
+      p.style.animationDelay = (Math.random() * 0.12) + "s";
+
+      layer.appendChild(p);
+      petals.push(p);
+    }
+
+    /* =========================================================
+       🌸 1단: 충돌 → 2단: 부착 → 3단: 미끄러짐 → 4단: 폭발
+       + 마지막: 자유 흩날림 (drift)
+    ========================================================= */
+
+    setTimeout(() => {
+      petals.forEach(p => {
+        p.classList.remove("hit");
+        p.classList.add("stick");
+      });
+    }, 120);
+
+    setTimeout(() => {
+      petals.forEach(p => {
+        p.classList.remove("stick");
+        p.classList.add("slide");
+      });
+    }, 350);
+
+    setTimeout(() => {
+      petals.forEach(p => {
+        p.classList.remove("slide");
+        p.classList.add("burst");
+      });
+    }, 700);
+
+    /* =========================================================
+       🌪 FINAL: 자유 흩날림 (핵심 추가)
+    ========================================================= */
+    setTimeout(() => {
+
+      petals.forEach(p => {
+        p.className = "sakura post-flip";
+
+        const rx = (Math.random() - 0.5) * 800;
+        const ry = (Math.random() - 0.5) * 600;
+
+        p.style.setProperty("--x", rx + "px");
+        p.style.setProperty("--y", ry + "px");
+
+        p.style.animationDuration = (3 + Math.random() * 4) + "s";
+      });
+
+    }, 1000);
+
+    setTimeout(() => {
+      petals.forEach(p => p.remove());
+    }, 6000);
+  }
+
+  /* =========================================================
+     🌸 BACKGROUND VORTEX
+  ========================================================= */
+  function createSakuraVortex(bgLayer) {
+
+    const camera = document.createElement("div");
+    camera.className = "camera -x";
+
+    const container = document.createElement("div");
+    container.style.position = "absolute";
+    container.style.inset = "0";
+
+    camera.appendChild(container);
+
+    const count = 200;
+
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+
+    const turns = 5.2;
+
+    for (let i = 0; i < count; i++) {
+
+      const p = document.createElement("div");
+      p.className = "sakura";
+
+      const t = i / count;
+      const angle = t * Math.PI * 2 * turns;
+
+      const r = window.innerWidth * (1.0 - t * 0.92);
+
+      const x = Math.cos(angle) * r;
+      const y = Math.sin(angle) * r;
+
+      p.style.left = cx + "px";
+      p.style.top = cy + "px";
+
+      p.style.setProperty("--x", x + "px");
+      p.style.setProperty("--y", y + "px");
+
+      p.style.animationDelay = (i * 0.002) + "s";
+
+      container.appendChild(p);
+    }
+
+    bgLayer.replaceChildren(camera);
+
+    cameraSequence(camera);
+  }
+
+  /* =========================================================
+     🎴 SSR CARD FX
+  ========================================================= */
+  function applySSRCardFX(card) {
+
+    card.style.position = "absolute";
+    card.style.top = "50%";
+    card.style.left = "50%";
+    card.style.transform = "translate(-50%, -50%) scale(1.42)";
+    card.style.zIndex = "999999";
+
+    card.style.boxShadow =
+      "0 0 140px rgba(255,80,120,0.75), 0 0 240px rgba(120,80,255,0.5)";
+
+    card.style.filter =
+      "brightness(1.35) contrast(1.2) saturate(1.4)";
+
+    card.style.animation =
+      "cardFloat 3s ease-in-out infinite, glow 2s ease-in-out infinite";
+  }
+
+  /* =========================================================
+     💥 SSR PLAY CORE
+  ========================================================= */
+  function play(card, rarity, done) {
+
+    const overlay = getOverlay();
+    if (!overlay) return;
+
+    const bgLayer = getBgLayer(overlay);
+    const cardLayer = getCardLayer(overlay);
+
+    overlay.style.display = "block";
+
+    overlay.classList.add("time-freeze");
+    uiWarpStart(overlay);
+
+    setTimeout(() => {
+      overlay.classList.remove("time-freeze");
+      uiWarpEnd(overlay);
+    }, 220);
+
+    if (rarity === "SSR") heartbeatBurst(overlay);
+
+    overlay.classList.remove("shake", "flash");
+    void overlay.offsetWidth;
+
+    overlay.classList.add("shake");
+
+    setTimeout(() => overlay.classList.add("flash"), 120);
+
+    bgLayer.replaceChildren();
+    createSakuraVortex(bgLayer);
+
+    setTimeout(() => {
+
+      cardLayer.replaceChildren();
+      cardLayer.appendChild(card);
+
+      applySSRCardFX(card);
+
+      card.dataset.flipped = "false";
+
+      let locked = false;
+
+      card.onclick = (e) => {
+        e.stopPropagation();
+        if (locked) return;
+        locked = true;
+
+        if (card.dataset.flipped === "false") {
+
+          card.classList.add("flip");
+          card.dataset.flipped = "true";
+
+          spawnFlipSakuraBurst(card, overlay);
+
+          overlay.classList.add("shake");
+          setTimeout(() => overlay.classList.remove("shake"), 280);
+
+          uiWarpStart(overlay);
+          setTimeout(() => uiWarpEnd(overlay), 300);
+
+          heartbeatBurst(overlay);
+
+          window.ssrBurst?.(card);
+
+          setTimeout(() => locked = false, 260);
+          return;
+        }
+
+        window.location.href = "/collection.html";
+      };
+
+      if (done) done();
+
+    }, 650);
+  }
+
+  return { play };
 
 })();

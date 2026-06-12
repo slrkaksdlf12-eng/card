@@ -9,23 +9,47 @@
   <!-- 공용 카드 스타일 -->
   <link rel="stylesheet" href="/static/css/card.css">
 
+  <!-- SSR 스타일 -->
+  <link rel="stylesheet" href="/static/css/ssr.css">
+
   <!-- gacha 로직 -->
   <script src="/static/js/card.js" defer></script>
 </head>
 
 <body>
 
-  <!-- 🔥 UI LAYER (WebView fixed 안정화 핵심) -->
+  <!-- 🔥 UI LAYER -->
   <div class="ui-layer">
     <button class="back-btn" onclick="location.href='/'" data-i18n="back">
       BACK
     </button>
   </div>
 
-  <!-- 🔥 MAIN LAYER (3D 카드 전용) -->
+  <!-- 🔥 MAIN LAYER -->
   <div class="wrap">
     <div id="cardArea"></div>
   </div>
+
+  <!-- =========================
+       🔥 SSR OVERLAY (CINEMATIC CUTSCENE STRUCTURE)
+  ========================= -->
+  <div id="ssrOverlay">
+
+    <!-- 🎬 CAMERA SYSTEM (핵심 추가) -->
+    <div class="camera -x">
+
+      <!-- 🌸 BACKGROUND / PARTICLE LAYER -->
+      <div class="bg-layer"></div>
+
+      <!-- 🃏 CARD / UI LAYER -->
+      <div class="card-layer"></div>
+
+    </div>
+
+  </div>
+
+  <!-- SSR 로직 -->
+  <script src="/static/js/ssr.js" defer></script>
 
 </body>
 </html>

@@ -208,6 +208,20 @@ def manifest():
 def sw():
     return send_from_directory("static/js", "sw.js")
 
+@app.route("/api/admin/collection/wipe", methods=["POST"])
+def wipe_collection():
+    if "user" not in session:
+        return jsonify({"error": "unauthorized"}), 401
+
+    # 🔥 컬렉션 "데이터만" 삭제 (테이블 유지)
+    Collection.query.delete()
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "collection wiped"
+    })    
+
 # =====================================================
 # RUN
 # =====================================================

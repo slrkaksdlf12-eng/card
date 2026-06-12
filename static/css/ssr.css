@@ -1,39 +1,326 @@
-#ssrLayer {
+/* =========================================================
+   🎴 SSR OVERLAY CONTAINER (GAME CUTSCENE UPGRADED)
+   ========================================================= */
+#ssrOverlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 999999;
   display: none;
   overflow: hidden;
-  background: black;
+
+  perspective: 1800px;
+  transform-style: preserve-3d;
+
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 220, 240, 0.24), transparent 42%),
+    radial-gradient(circle at 30% 60%, rgba(180, 120, 255, 0.16), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(255, 120, 160, 0.12), transparent 60%),
+    linear-gradient(to bottom, #07010f, #000);
+
+  animation: sceneIn 1.2s ease-out forwards;
 }
 
-#ssrLayer canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.ssr-hint {
+/* ===== BLOOM FOG ===== */
+#ssrOverlay::before {
+  content: "";
   position: absolute;
-  bottom: 40px;
-  width: 100%;
-  text-align: center;
-  color: white;
-  font-size: 14px;
-  opacity: 0.7;
+  inset: -70%;
+
+  background:
+    radial-gradient(circle, rgba(255, 120, 160, 0.16), transparent 60%),
+    radial-gradient(circle, rgba(120, 80, 255, 0.12), transparent 55%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 70%);
+
+  filter: blur(100px);
+  animation: fogDrift 14s ease-in-out infinite alternate;
+  transform: translateZ(0);
 }
 
-.ssr-reveal {
-  animation: ssrPop 0.8s ease-out forwards;
+/* ===== LAYERS ===== */
+.bg-layer,
+.card-layer {
+  position: absolute;
+  inset: 0;
 }
 
-@keyframes ssrPop {
+/* ===== CAMERA (3 STAGE CUTSCENE SUPPORT) ===== */
+.camera {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.camera.-x {
+  transform: rotateX(24deg) rotateY(-12deg);
+}
+
+/* =========================================================
+   🌸 SAKURA / PETALS (VORTEX + BLACK HOLE FLOW)
+   ========================================================= */
+.sakura,
+.drop {
+  position: absolute;
+  top: -25vh;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+
+  border-radius: 60% 40% 60% 40%;
+
+  background:
+    radial-gradient(circle at 30% 30%,
+      rgba(255,255,255,0.95),
+      rgba(255,182,193,0.75) 40%,
+      rgba(255,182,193,0) 70%);
+
+  filter: blur(0.25px);
+  opacity: 0;
+
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+
+  mix-blend-mode: screen;
+
+  animation: sakuraVortex 5.2s cubic-bezier(.2,.8,.2,1) infinite;
+}
+
+/* ===== MOBILE VARIATION ===== */
+.sakura:nth-child(2n),
+.drop:nth-child(2n) {
+  transform: scale(1.25);
+  filter: blur(0.7px);
+}
+
+.sakura:nth-child(3n),
+.drop:nth-child(3n) {
+  transform: scale(1.6);
+  opacity: 0.65;
+}
+
+.sakura:nth-child(5n),
+.drop:nth-child(5n) {
+  animation-duration: 6.5s;
+}
+
+/* =========================================================
+   🌪 BLACK HOLE VORTEX
+   ========================================================= */
+@keyframes sakuraVortex {
+
   0% {
-    transform: scale(0.6) translateY(80px);
+    transform:
+      translate3d(0, -30vh, -200px)
+      rotate(0deg)
+      scale(0.2);
     opacity: 0;
+    filter: blur(3px);
   }
+
+  10% { opacity: 1; }
+
+  30% {
+    transform:
+      translate3d(calc(var(--x, 0px) * 0.8), 20vh, 200px)
+      rotate(200deg)
+      scale(1);
+    filter: blur(0.8px);
+  }
+
+  55% {
+    transform:
+      translate3d(calc(var(--x, 0px) * -1.2), 55vh, 600px)
+      rotate(520deg)
+      scale(1.35);
+  }
+
+  75% {
+    transform:
+      translate3d(0, 65vh, 900px)
+      rotate(720deg)
+      scale(1.1);
+    filter: blur(0.2px);
+  }
+
+  90% {
+    transform:
+      translate3d(calc(var(--x, 0px) * 2.2), 120vh, 1100px)
+      rotate(900deg)
+      scale(0.8);
+    opacity: 0.4;
+  }
+
   100% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
+    opacity: 0;
+    transform:
+      translate3d(calc(var(--x, 0px) * 3), 140vh, 1300px)
+      rotate(1080deg)
+      scale(0.6);
   }
+}
+
+/* =========================================================
+   💥 CARD SSR (UPGRADED — ADDED ONLY)
+   ========================================================= */
+.ssr-card {
+  width: 250px;
+  height: 350px;
+  margin-top: 25px;
+
+  border-radius: 24px;
+
+  background: linear-gradient(145deg, #ff4d6d, #7b2cbf);
+
+  box-shadow:
+    0 0 110px rgba(255, 77, 109, 0.5),
+    0 0 180px rgba(123, 44, 191, 0.28),
+    inset 0 0 25px rgba(255,255,255,0.25);
+
+  animation:
+    cardFloat 3.2s ease-in-out infinite,
+    cardGlow 2.2s ease-in-out infinite,
+    cardShake 0.6s ease-in-out infinite;
+}
+
+/* hologram edge */
+.ssr-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+
+  background: linear-gradient(45deg,
+    rgba(255,255,255,0.1),
+    rgba(255,80,120,0.3),
+    rgba(123,44,191,0.3));
+
+  filter: blur(10px);
+  opacity: 0.9;
+  z-index: -1;
+}
+
+/* scanline + distortion */
+.ssr-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.05) 1px,
+    transparent 3px,
+    transparent 7px
+  );
+
+  animation: scanMove 2s linear infinite;
+  opacity: 0.25;
+}
+
+/* =========================================================
+   🌸 FLIP AFTER FLOW (NEW — REQUESTED)
+   ========================================================= */
+.sakura.post-flip {
+  animation: postFlipFloat 2.5s ease-in-out infinite;
+}
+
+/* =========================================================
+   🌸 HIT STATES (충돌 → 부착 → 미끄러짐 → 폭발)
+   ========================================================= */
+.sakura.hit {
+  animation: petalHit 0.35s ease-out forwards;
+}
+
+.sakura.stick {
+  animation: petalStick 0.6s ease-out forwards;
+}
+
+.sakura.slide {
+  animation: petalSlide 0.8s ease-in-out forwards;
+}
+
+.sakura.burst {
+  animation: petalBurst 0.5s ease-out forwards;
+}
+
+/* =========================================================
+   🎬 SSR UI DISTORTION (ADDED)
+   ========================================================= */
+#ssrOverlay.time-freeze {
+  filter: brightness(1.7) contrast(1.3) saturate(1.5);
+  transform: scale(1.01);
+}
+
+#ssrOverlay.heartbeat {
+  animation: heartbeat 0.9s ease-in-out;
+}
+
+#ssrOverlay.ui-warp {
+  animation: uiWarp 0.6s ease-in-out;
+}
+
+/* =========================================================
+   🎥 CAMERA 3 STAGE (KEEP)
+   ========================================================= */
+.camera.zoom-wide { transform: rotateX(24deg) rotateY(-10deg) scale(1.25) translateZ(-300px); }
+.camera.zoom-mid { transform: rotateX(24deg) rotateY(-10deg) scale(1.05) translateZ(-120px); }
+.camera.zoom-close { transform: rotateX(24deg) rotateY(-10deg) scale(1) translateZ(0px); }
+
+/* =========================================================
+   ✨ KEYFRAMES (ADDED ONLY)
+   ========================================================= */
+@keyframes cardGlow {
+  0%,100% { filter: drop-shadow(0 0 15px rgba(255,80,120,0.4)); }
+  50% { filter: drop-shadow(0 0 60px rgba(255,80,120,0.95)); }
+}
+
+@keyframes cardShake {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-2px,2px); }
+  50% { transform: translate(2px,-2px); }
+  75% { transform: translate(-1px,1px); }
+  100% { transform: translate(0,0); }
+}
+
+@keyframes scanMove {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(20px); }
+}
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes uiWarp {
+  0% { filter: blur(0px); }
+  50% { filter: blur(2px) brightness(1.4); }
+  100% { filter: blur(0px); }
+}
+
+@keyframes petalHit {
+  0% { transform: translate(0,0) scale(1); opacity:1; }
+  100% { transform: translate(calc(var(--x)*1.5), calc(var(--y)*1.5)) scale(0.2); opacity:0; }
+}
+
+@keyframes petalStick {
+  0% { transform: translate(0,0) scale(1); opacity:1; }
+  100% { transform: translate(calc(var(--x)*0.2), calc(var(--y)*0.2)) scale(1.1); opacity:0.8; }
+}
+
+@keyframes petalSlide {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(calc(var(--x)*1.2), calc(var(--y)*0.6)); opacity:0.6; }
+}
+
+@keyframes petalBurst {
+  0% { transform: scale(1); opacity:1; }
+  100% { transform: scale(0.2) translate(calc(var(--x)*2), calc(var(--y)*2)); opacity:0; }
+}
+
+@keyframes postFlipFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-25px) rotate(2deg); }
+  100% { transform: translateY(0); }
 }

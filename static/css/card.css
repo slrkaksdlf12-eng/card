@@ -3,65 +3,52 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-
-  background: #000;
+  background: radial-gradient(circle at center, #0a0a0a, #000);
   color: #fff;
-
   overflow: hidden;
   touch-action: none;
-
   font-family: sans-serif;
 }
 
 /* =========================
-   WRAP (🔥 stacking context 분리 핵심)
+   WRAP
 ========================= */
 .wrap {
   width: 100%;
   height: 100%;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   gap: 16px;
-
   position: relative;
-
-  /* 🔥 Android WebView 핵심 안정화 */
   isolation: isolate;
   transform: translateZ(0);
 }
 
 /* =========================
-   BACK BUTTON (🔥 최상단 고정 + 레이어 승격)
+   BACK BUTTON
 ========================= */
 .back-btn {
   position: fixed;
-
   top: calc(12px + env(safe-area-inset-top));
   left: calc(12px + env(safe-area-inset-left));
 
   padding: 8px 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
 
-  background: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.15);
   color: white;
 
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-
-  /* 🔥 핵심 3종 세트 (WebView용) */
   z-index: 2147483647;
+
+  backdrop-filter: blur(10px);
   transform: translateZ(0);
-  will-change: transform;
-  isolation: isolate;
 }
 
 /* =========================
-   CARD AREA (3D STAGE)
+   CARD AREA
 ========================= */
 #cardArea {
   width: 95vw;
@@ -69,16 +56,8 @@ html, body {
   height: 420px;
 
   position: relative;
-
-  overflow: visible;
-
   perspective: 1200px;
-
-  display: block;
-
-  z-index: 1;
-
-  /* 🔥 GPU 레이어 안정화 */
+  overflow: visible;
   transform: translateZ(0);
 }
 
@@ -90,7 +69,6 @@ html, body {
   aspect-ratio: 2 / 3;
 
   position: absolute;
-
   top: 50%;
   left: 50%;
 
@@ -101,10 +79,10 @@ html, body {
   transform-style: preserve-3d;
   backface-visibility: hidden;
 
-  transform-origin: center center;
   will-change: transform, filter;
+  transition: transform 0.5s ease, filter 0.4s ease, opacity 0.3s ease;
 
-  transition: transform 0.35s ease, filter 0.35s ease;
+  border-radius: 12px;
 }
 
 /* =========================
@@ -113,11 +91,9 @@ html, body {
 .card-inner {
   width: 100%;
   height: 100%;
-
   position: relative;
-
   transform-style: preserve-3d;
-  transition: transform 0.6s ease;
+  transition: transform 0.65s cubic-bezier(.2,.8,.2,1);
 }
 
 .card.flip .card-inner {
@@ -132,9 +108,6 @@ html, body {
   position: absolute;
   inset: 0;
 
-  width: 100%;
-  height: 100%;
-
   border-radius: 12px;
 
   backface-visibility: hidden;
@@ -143,7 +116,7 @@ html, body {
   justify-content: center;
   align-items: center;
 
-  background: rgba(255,255,255,0.08);
+  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
   border: 1px solid rgba(255,255,255,0.15);
 
   overflow: hidden;
@@ -153,32 +126,25 @@ html, body {
   transform: rotateY(180deg);
 }
 
-/* =========================
-   IMAGE
-========================= */
-.card-front img,
-.card-back img {
+.card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 /* =========================
-   BADGE
+   BADGES
 ========================= */
 .badge {
   position: absolute;
   top: 6px;
   left: 6px;
 
-  z-index: 20;
-
-  padding: 2px 6px;
+  padding: 3px 7px;
   font-size: 12px;
   font-weight: bold;
 
-  border-radius: 6px;
+  border-radius: 8px;
 
   background: rgba(0,0,0,0.7);
   color: #fff;
@@ -186,28 +152,21 @@ html, body {
   pointer-events: none;
 }
 
-/* =========================
-   NEW
-========================= */
 .new-badge {
   position: absolute;
   top: 6px;
   right: 6px;
 
   font-size: 11px;
-  padding: 2px 5px;
+  padding: 3px 6px;
 
-  background: red;
+  background: linear-gradient(135deg, #ff2d2d, #ff7b00);
   color: white;
-  border-radius: 6px;
 
-  z-index: 30;
-  pointer-events: none;
+  border-radius: 8px;
+  z-index: 10;
 }
 
-/* =========================
-   COUNT
-========================= */
 .count-badge {
   position: absolute;
   right: 6px;
@@ -218,7 +177,155 @@ html, body {
 
   background: rgba(0,0,0,0.75);
   color: white;
-  border-radius: 6px;
 
-  z-index: 20;
+  border-radius: 6px;
+}
+
+/* =========================================================
+   💎 RARITY THEMES (핵심 추가)
+========================================================= */
+
+/* =========================
+   SSR - GOLD THEME
+========================= */
+.card.rarity-SSR {
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.25);
+}
+
+.card.rarity-SSR .card-front,
+.card.rarity-SSR .card-back {
+  background: linear-gradient(145deg, rgba(255,215,0,0.15), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255, 215, 0, 0.35);
+}
+
+/* SSR pulse */
+.card.rarity-SSR.ssr-glow {
+  animation: ssrPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes ssrPulse {
+  0% {
+    filter: drop-shadow(0 0 0px gold);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 22px gold);
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  100% {
+    filter: drop-shadow(0 0 0px gold);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* =========================
+   SR - SILVER THEME
+========================= */
+.card.rarity-SR {
+  border: 1px solid rgba(192, 192, 192, 0.5);
+  box-shadow: 0 0 14px rgba(192, 192, 192, 0.2);
+}
+
+.card.rarity-SR .card-front,
+.card.rarity-SR .card-back {
+  background: linear-gradient(145deg, rgba(192,192,192,0.12), rgba(255,255,255,0.03));
+  border: 1px solid rgba(192, 192, 192, 0.3);
+}
+
+/* SR subtle pulse */
+.card.rarity-SR.ssr-glow {
+  animation: srPulse 1.6s infinite ease-in-out;
+}
+
+@keyframes srPulse {
+  0% {
+    filter: drop-shadow(0 0 0px silver);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 14px silver);
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+  100% {
+    filter: drop-shadow(0 0 0px silver);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* =========================
+   SSR OVERLAY (무대)
+========================= */
+#ssrOverlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* =========================
+   SSR BACKGROUND
+========================= */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(255,215,0,0.08), transparent 60%);
+}
+
+/* SR일 때 살짝 색 다르게 */
+#ssrOverlay.sr .bg-layer {
+  background: radial-gradient(circle at center, rgba(192,192,192,0.08), transparent 60%);
+}
+
+/* =========================
+   CARD LAYER
+========================= */
+.card-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =========================
+   BURST EFFECT
+========================= */
+.ssr-burst {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,215,0,0.9), transparent 60%);
+  animation: burst 0.6s ease-out forwards;
+}
+
+#ssrOverlay.sr .ssr-burst {
+  background: radial-gradient(circle, rgba(192,192,192,0.9), transparent 60%);
+}
+
+@keyframes burst {
+  from {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* =========================
+   SCREEN SHAKE
+========================= */
+.shake {
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(3px,-2px); }
+  50% { transform: translate(-3px,2px); }
+  75% { transform: translate(2px,2px); }
+  100% { transform: translate(0,0); }
 }
